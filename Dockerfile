@@ -52,8 +52,8 @@ WORKDIR /var/www/wp-content
 RUN chown -R nobody.nobody /var/www
 
 # WordPress
-ENV WORDPRESS_VERSION 6.4.1
-ENV WORDPRESS_SHA1 35e62d935d6a93097366476e389752dd55d8a077
+ENV WORDPRESS_VERSION 6.4.2
+ENV WORDPRESS_SHA1 d1aedbfea77b243b09e0ab05b100b782497406dd
 
 RUN mkdir -p /usr/src
 
@@ -75,9 +75,8 @@ RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh
 COPY wp-config.php /usr/src/wordpress
 RUN chown nobody.nobody /usr/src/wordpress/wp-config.php && chmod 640 /usr/src/wordpress/wp-config.php
 
-# Append WP secrets
-COPY wp-secrets.php /usr/src/wordpress
-RUN chown nobody.nobody /usr/src/wordpress/wp-secrets.php && chmod 640 /usr/src/wordpress/wp-secrets.php
+# Link wp-secrets to location on wp-content
+RUN ln -s /var/www/wp-content/wp-secrets.php /usr/src/wordpress/wp-secrets.php
 
 # Entrypoint to copy wp-content
 COPY entrypoint.sh /entrypoint.sh
