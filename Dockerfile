@@ -1,6 +1,21 @@
-FROM alpine:3.21
-LABEL Maintainer="Tim de Pater <code@trafex.nl>" \
-  Description="Lightweight WordPress container with Nginx 1.26 & PHP-FPM 8.4 based on Alpine Linux."
+FROM alpine:3.23
+
+# Build arguments for OCI annotations
+ARG BUILD_DATE
+ARG VERSION
+ARG VCS_REF
+
+# OCI annotations
+LABEL org.opencontainers.image.created="${BUILD_DATE}"
+LABEL org.opencontainers.image.authors="Tim de Pater <code@trafex.nl>"
+LABEL org.opencontainers.image.url="https://github.com/TrafeX/docker-wordpress"
+LABEL org.opencontainers.image.documentation="https://github.com/TrafeX/docker-wordpress"
+LABEL org.opencontainers.image.source="https://github.com/TrafeX/docker-wordpress"
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.revision="${VCS_REF}"
+LABEL org.opencontainers.image.vendor="TrafeX"
+LABEL org.opencontainers.image.title="WordPress with Nginx 1.28 & PHP-FPM 8.4"
+LABEL org.opencontainers.image.description="Lightweight WordPress container with Nginx 1.28 & PHP-FPM 8.4 based on Alpine Linux."
 
 # Install packages
 RUN apk --no-cache add \
@@ -46,16 +61,14 @@ COPY config/php.ini /etc/php84/conf.d/zzz_custom.ini
 # Configure supervisord
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN ln -s /usr/bin/php84 /usr/bin/php
-
 # wp-content volume
 VOLUME /var/www/wp-content
 WORKDIR /var/www/wp-content
 RUN chown -R nobody:nobody /var/www
 
 # WordPress
-ENV WORDPRESS_VERSION 6.8.2
-ENV WORDPRESS_SHA1 03baad10b8f9a416a3e10b89010d811d9361e468
+ENV WORDPRESS_VERSION=6.9
+ENV WORDPRESS_SHA1=256dda5bb6a43aecd806b7a62528f442c06e6c25
 
 RUN mkdir -p /usr/src
 
@@ -67,7 +80,7 @@ RUN curl -o wordpress.tar.gz -SL https://wordpress.org/wordpress-${WORDPRESS_VER
   && chown -R nobody:nobody /usr/src/wordpress
 
 # Add WP CLI
-ENV WP_CLI_CONFIG_PATH /usr/src/wordpress/wp-cli.yml
+ENV WP_CLI_CONFIG_PATH=/usr/src/wordpress/wp-cli.yml
 RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
   && chmod +x /usr/local/bin/wp
 COPY --chown=nobody:nobody wp-cli.yml /usr/src/wordpress/
